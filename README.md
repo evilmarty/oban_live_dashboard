@@ -1,5 +1,10 @@
 # Oban Live Dashboard
 
+[![CI](https://github.com/evilmarty/oban_live_dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/evilmarty/oban_live_dashboard/actions/workflows/ci.yml)
+[![Hex Version](https://img.shields.io/hexpm/v/oban_live_dashboard.svg)](https://hex.pm/packages/oban_live_dashboard)
+[![Hex Docs](http://img.shields.io/badge/hex.pm-docs-green.svg?style=flat)](https://hexdocs.pm/oban_live_dashboard)
+[![Apache 2.0](https://img.shields.io/hexpm/l/oban_live_dashboard)](https://opensource.org/licenses/Apache-2.0)
+
 A simple [Phoenix Live Dashboard](https://github.com/phoenixframework/phoenix_live_dashboard) for [Oban](https://github.com/sorentwo/oban) jobs.
 
 ## Installation

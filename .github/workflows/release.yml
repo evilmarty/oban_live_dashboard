@@ -3,9 +3,16 @@ name: Release
 on:
   release:
     types: [published]
+  workflow_run:
+    workflows:
+      - "Create Release"
+    types:
+      - completed
+  workflow_dispatch:
 
 jobs:
   publish:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

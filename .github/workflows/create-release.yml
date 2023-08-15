@@ -1,0 +1,33 @@
+name: create release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - mix.exs
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - id: version
+      run: |
+        version=$(sed -n '/version:/s/.*:\s*//p' mix.exs | sed -E 's/(^[^"]*"|"[^"]*$)//g')
+        tag="v${version}"
+        gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${GITHUB_REPOSITORY}/releases/tags/${tag}" || (
+          echo "new_version=${version}" >> "$GITHUB_OUTPUT"
+          echo "new_tag=${tag}" >> "$GITHUB_OUTPUT"
+        )
+    - name: Create release
+      if: steps.version.outputs.new_version
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: "${{steps.version.outputs.new_tag}}"
+        target_commitish: ${{github.sha}}
+        generate_release_notes: true
+        prerelease: true

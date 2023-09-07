@@ -14,7 +14,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - id: version
       run: |
         version=$(sed -n '/version:/s/.*:\s*//p' mix.exs | sed -E 's/(^[^"]*"|"[^"]*$)//g')

@@ -30,7 +30,7 @@ jobs:
         elixir-version: ${{matrix.pair.elixir-version}}
         otp-version: ${{matrix.pair.otp-version}}
     - name: Restore elixir dependencies cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: deps
         key: ${{runner.os}}-mix-${{matrix.elixir-version}}-${{matrix.otp-version}}-${{hashFiles('**/mix.lock')}}

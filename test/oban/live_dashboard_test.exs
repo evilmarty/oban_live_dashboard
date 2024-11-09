@@ -14,15 +14,19 @@ defmodule Oban.LiveDashboardTest do
   test "shows jobs with limit" do
     for _ <- 1..110, do: job_fixture()
     {:ok, live, rendered} = live(build_conn(), "/dashboard/oban")
-    assert rendered |> :binary.matches("<td class=\"oban-jobs-id\"") |> length() <= 100
+
+    assert rendered |> :binary.matches("<td class=\"oban-jobs-executing-worker\"") |> length() ==
+             20
 
     rendered = render_patch(live, "/dashboard/oban?limit=100")
-    assert rendered |> :binary.matches("<td class=\"oban-jobs-id\"") |> length() == 100
+
+    assert rendered |> :binary.matches("<td class=\"oban-jobs-executing-worker\"") |> length() ==
+             100
   end
 
   test "shows job info modal" do
     job = job_fixture(%{something: "foobar"})
-    {:ok, live, rendered} = live(build_conn(), "/dashboard/oban?params[job]=#{job.id}")
+    {:ok, live, _rendered} = live(build_conn(), "/dashboard/oban?params[job]=#{job.id}")
     rendered = render(live)
     assert rendered =~ "modal-content"
     assert rendered =~ "%{&quot;something&quot; =&gt; &quot;foobar&quot;}"
@@ -30,7 +34,14 @@ defmodule Oban.LiveDashboardTest do
   end
 
   defp job_fixture(args \\ %{}) do
-    {:ok, job} = Oban.Job.new(args, worker: "FakeWorker") |> Oban.insert()
+    {:ok, job} =
+      Oban.Job.new(args,
+        worker: "FakeWorker",
+        state: "executing",
+        attempted_at: DateTime.utc_now()
+      )
+      |> Oban.insert()
+
     job
   end
 end

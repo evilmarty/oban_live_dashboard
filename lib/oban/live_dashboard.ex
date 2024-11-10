@@ -96,6 +96,15 @@ defmodule Oban.LiveDashboard do
   end
 
   @impl true
+  def handle_refresh(socket) do
+    {:noreply,
+     Phoenix.Component.update(socket, :job, fn
+       nil -> nil
+       %{id: job_id} -> get_job(job_id)
+     end)}
+  end
+
+  @impl true
   def handle_event("show_job", params, socket) do
     to = live_dashboard_path(socket, socket.assigns.page, params: params)
     {:noreply, push_patch(socket, to: to)}

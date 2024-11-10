@@ -27,8 +27,8 @@ defmodule Oban.LiveDashboard do
       <:item :for={{job_state, count} <- @job_state_counts} name={job_state} label={job_state_label(job_state, count)} method="navigate">
         <.live_table id="oban_jobs" limit={per_page_limits()} dom_id={"oban-jobs-#{job_state}"} page={@page} row_attrs={&row_attrs/1} row_fetcher={&fetch_jobs(&1, &2, job_state)} default_sort_by={@timestamp_field} title="" search={false}>
           <:col :let={job} field={:worker} sortable={:desc}>
-            <p class="font-weight-bold"><%= job.worker %></p>
-            <pre class="font-weight-lighter text-muted"><%= truncate(inspect(job.args)) %></pre>
+            <p class="font-weight-bold m-0"><%= job.worker %></p>
+            <pre class="font-weight-lighter text-muted m-0"><%= truncate(inspect(job.args)) %></pre>
           </:col>
           <:col :let={job} field={:attempt} header="Attempt" sortable={:desc}>
             <%= job.attempt %>/<%= job.max_attempts %>

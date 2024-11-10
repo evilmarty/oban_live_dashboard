@@ -35,7 +35,7 @@ defmodule Oban.LiveDashboard do
           </:col>
           <:col field={:queue} header="Queue" sortable={:desc} />
           <:col :let={job} field={@timestamp_field} sortable={:desc}>
-            <%= Timex.from_now(timestamp(job, @timestamp_field)) %>
+            <%= format_value(timestamp(job, @timestamp_field)) %>
           </:col>
         </.live_table>
       </:item>
@@ -201,10 +201,10 @@ defmodule Oban.LiveDashboard do
   end
 
   defp format_value(%DateTime{} = datetime) do
-    DateTime.to_string(datetime)
+    Calendar.strftime(datetime, "%Y-%m-%d %H:%M:%S")
   end
 
-  defp format_value(nil), do: nil
+  defp format_value(value), do: value
 
   defp timestamp(job, timestamp_field) do
     Map.get(job, timestamp_field)

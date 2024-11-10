@@ -24,6 +24,47 @@ defmodule Oban.LiveDashboardTest do
              100
   end
 
+  test "switch between states" do
+    Oban.LiveDashboardTest.Repo.delete_all(Oban.Job)
+    _executing_job = job_fixture(%{"foo" => "executing"}, "executing")
+    _completed_job = job_fixture(%{"foo" => "completed"}, "completed")
+
+    conn = build_conn()
+    {:ok, live, rendered} = live(conn, "/dashboard/oban")
+
+    assert rendered |> :binary.matches("<td class=\"oban-jobs-all-worker\"") |> length() == 2
+
+    {:ok, live, rendered} =
+      live
+      |> element("a", "executing - (1)")
+      |> render_click()
+      |> follow_redirect(conn)
+
+    assert rendered
+           |> :binary.matches("<td class=\"oban-jobs-executing-worker\"")
+           |> length() == 1
+
+    {:ok, live, rendered} =
+      live
+      |> element("a", "completed - (1)")
+      |> render_click()
+      |> follow_redirect(conn)
+
+    assert rendered
+           |> :binary.matches("<td class=\"oban-jobs-completed-worker\"")
+           |> length() == 1
+
+    {:ok, _live, rendered} =
+      live
+      |> element("a", "scheduled - (0)")
+      |> render_click()
+      |> follow_redirect(conn)
+
+    assert rendered
+           |> :binary.matches("<td class=\"oban-jobs-executing-worker\"")
+           |> length() == 0
+  end
+
   test "shows job info modal" do
     job = job_fixture(%{something: "foobar"})
     {:ok, live, _rendered} = live(build_conn(), "/dashboard/oban?params[job]=#{job.id}")
@@ -33,11 +74,11 @@ defmodule Oban.LiveDashboardTest do
     refute live |> element("#modal-close") |> render_click() =~ "modal"
   end
 
-  defp job_fixture(args \\ %{}) do
+  defp job_fixture(args \\ %{}, state \\ "executing") do
     {:ok, job} =
       Oban.Job.new(args,
         worker: "FakeWorker",
-        state: "executing",
+        state: state,
         attempted_at: DateTime.utc_now()
       )
       |> Oban.insert()

@@ -174,7 +174,7 @@ defmodule Oban.LiveDashboard do
     |> filter_by_job_state(job_state)
     |> filter_by_params(params)
   end
-  
+
   defp jobs_count_query("all") do
     Oban.Job
   end
@@ -182,13 +182,13 @@ defmodule Oban.LiveDashboard do
   defp jobs_count_query(job_state) do
     filter_by_job_state(Oban.Job, job_state)
   end
-  
+
   defp filter_by_params(queryable, %{sort_by: sort_by, sort_dir: sort_dir, limit: limit}) do
     queryable
     |> limit(^limit)
     |> order_by({^sort_dir, ^sort_by})
   end
-  
+
   defp filter_by_job_state(queryable, job_state) do
     where(queryable, [job], job.state == ^job_state)
   end

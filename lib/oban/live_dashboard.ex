@@ -27,17 +27,15 @@ defmodule Oban.LiveDashboard do
       <:item :for={{job_state, count} <- @job_state_counts} name={job_state} label={job_state_label(job_state, count)} method="navigate">
         <.live_table id="oban_jobs" limit={per_page_limits()} dom_id={"oban-jobs-#{job_state}"} page={@page} row_attrs={&row_attrs/1} row_fetcher={&fetch_jobs(&1, &2, job_state)} default_sort_by={@timestamp_field} title="" search={false}>
           <:col :let={job} field={:worker} sortable={:desc}>
-            <p class="font-weight-bolder"><%= job.worker %></p>
-            <pre class="args font-weight-lighter text-muted"><%= truncate(inspect(job.args)) %></pre>
+            <p class="font-weight-bold"><%= job.worker %></p>
+            <pre class="font-weight-lighter text-muted"><%= truncate(inspect(job.args)) %></pre>
           </:col>
           <:col :let={job} field={:attempt} header="Attempt" sortable={:desc}>
-            <span class="attempts font-weight-lighter">
-              <%= job.attempt %>/<%= job.max_attempts %>
-            </span>
+            <%= job.attempt %>/<%= job.max_attempts %>
           </:col>
           <:col field={:queue} header="Queue" sortable={:desc} />
           <:col :let={job} field={@timestamp_field} sortable={:desc}>
-            <%= Timex.from_now(timestamp(job)) %>
+            <%= Timex.from_now(timestamp(job, @timestamp_field)) %>
           </:col>
         </.live_table>
       </:item>
@@ -139,6 +137,9 @@ defmodule Oban.LiveDashboard do
       for job_state <- @oban_sorted_job_states,
           do: {job_state, Map.get(job_state_counts_in_db, job_state, 0)}
 
+    total_count = Keyword.values(job_state_counts) |> Enum.sum()
+    job_state_counts = [{"all", total_count} | job_state_counts]
+
     assign(socket, job_state_counts: job_state_counts)
   end
 
@@ -165,11 +166,21 @@ defmodule Oban.LiveDashboard do
     end
   end
 
+  defp jobs_query(%{sort_by: sort_by, sort_dir: sort_dir, limit: limit}, "all" = _job_state) do
+    Oban.Job
+    |> limit(^limit)
+    |> order_by({^sort_dir, ^sort_by})
+  end
+
   defp jobs_query(%{sort_by: sort_by, sort_dir: sort_dir, limit: limit}, job_state) do
     Oban.Job
     |> limit(^limit)
     |> where([job], job.state == ^job_state)
     |> order_by({^sort_dir, ^sort_by})
+  end
+
+  defp jobs_count_query("all" = _job_state) do
+    Oban.Job
   end
 
   defp jobs_count_query(job_state) do
@@ -195,16 +206,8 @@ defmodule Oban.LiveDashboard do
 
   defp format_value(nil), do: nil
 
-  defp timestamp(job) do
-    case job.state do
-      "available" -> job.scheduled_at
-      "cancelled" -> job.cancelled_at
-      "completed" -> job.completed_at
-      "discarded" -> job.discarded_at
-      "executing" -> job.attempted_at
-      "retryable" -> job.scheduled_at
-      "scheduled" -> job.scheduled_at
-    end
+  defp timestamp(job, timestamp_field) do
+    Map.get(job, timestamp_field)
   end
 
   defp assign_timestamp_field(%{assigns: %{job_state: job_state}} = socket) do
@@ -217,7 +220,7 @@ defmodule Oban.LiveDashboard do
         "executing" -> :attempted_at
         "retryable" -> :scheduled_at
         "scheduled" -> :scheduled_at
-        _ -> :attempted_at
+        _ -> :inserted_at
       end
 
     assign(socket, timestamp_field: timestamp_field)

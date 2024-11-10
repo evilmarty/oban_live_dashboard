@@ -15,12 +15,12 @@ defmodule Oban.LiveDashboardTest do
     for _ <- 1..110, do: job_fixture()
     {:ok, live, rendered} = live(build_conn(), "/dashboard/oban")
 
-    assert rendered |> :binary.matches("<td class=\"oban-jobs-executing-worker\"") |> length() ==
+    assert rendered |> :binary.matches("<td class=\"oban-jobs-all-worker\"") |> length() ==
              20
 
     rendered = render_patch(live, "/dashboard/oban?limit=100")
 
-    assert rendered |> :binary.matches("<td class=\"oban-jobs-executing-worker\"") |> length() ==
+    assert rendered |> :binary.matches("<td class=\"oban-jobs-all-worker\"") |> length() ==
              100
   end
 

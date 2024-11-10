@@ -19,10 +19,7 @@ defmodule Oban.LiveDashboard do
   @impl true
   def render(assigns) do
     ~H"""
-    <h1 class="mb-3">Oban</h1>
-
-    <p>Filter jobs by state:</p>
-
+    <h5 class="mb-3">Oban</h5>
     <.live_nav_bar id="oban_states" page={@page} nav_param="job_state" style={:bar} extra_params={["nav"]}>
       <:item :for={{job_state, count} <- @job_state_counts} name={job_state} label={job_state_label(job_state, count)} method="navigate">
         <.live_table id="oban_jobs" limit={per_page_limits()} dom_id={"oban-jobs-#{job_state}"} page={@page} row_attrs={&row_attrs/1} row_fetcher={&fetch_jobs(&1, &2, job_state)} default_sort_by={@timestamp_field} title="" search={false}>

@@ -61,7 +61,7 @@ defmodule Oban.LiveDashboardTest do
       |> follow_redirect(conn)
 
     assert rendered
-           |> :binary.matches("<td class=\"oban-jobs-executing-worker\"")
+           |> :binary.matches("<td class=\"oban-jobs-scheduled-worker\"")
            |> length() == 0
   end
 

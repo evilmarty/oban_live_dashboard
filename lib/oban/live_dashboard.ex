@@ -72,12 +72,7 @@ defmodule Oban.LiveDashboard do
   end
 
   @impl true
-  def mount(params, _, socket) do
-    socket =
-      socket
-      |> assign(job_state: Map.get(params, "job_state", "executing"))
-      |> assign(sort_by: Map.get(params, "job_state"))
-
+  def mount(_params, _, socket) do
     {:ok, socket}
   end
 
@@ -87,9 +82,11 @@ defmodule Oban.LiveDashboard do
   end
 
   @impl true
-  def handle_params(%{"params" => %{"job" => job_id}}, _url, socket) do
+  def handle_params(%{"params" => %{"job" => job_id}} = params, _url, socket) do
     socket =
       socket
+      |> assign(job_state: Map.get(params, "job_state", "executing"))
+      |> assign(sort_by: Map.get(params, "job_state"))
       |> assign(job: nil)
       |> assign_job_state_counts()
       |> assign_timestamp_field()
@@ -104,9 +101,11 @@ defmodule Oban.LiveDashboard do
     end
   end
 
-  def handle_params(_params, _uri, socket) do
+  def handle_params(params, _uri, socket) do
     socket =
       socket
+      |> assign(job_state: Map.get(params, "job_state", "executing"))
+      |> assign(sort_by: Map.get(params, "job_state"))
       |> assign(job: nil)
       |> assign_job_state_counts()
       |> assign_timestamp_field()

@@ -29,8 +29,26 @@ defmodule Oban.LiveDashboardTest do
     refute live |> element("#modal-close") |> render_click() =~ "modal"
   end
 
-  defp job_fixture(args \\ %{}) do
-    {:ok, job} = Oban.Job.new(args, worker: "FakeWorker") |> Oban.insert()
+  test "retry job from modal" do
+    job = job_fixture(%{something: "foobar"}, schedule_in: 1000)
+    {:ok, live, _rendered} = live(build_conn(), "/dashboard/oban?params[job]=#{job.id}")
+
+    assert has_element?(live, "pre", "scheduled")
+    element(live, "button", "Retry Job") |> render_click()
+    assert has_element?(live, "pre", "available")
+  end
+
+  test "cancel job from modal" do
+    job = job_fixture(%{something: "foobar"})
+    {:ok, live, _rendered} = live(build_conn(), "/dashboard/oban?params[job]=#{job.id}")
+
+    element(live, "button", "Cancel Job") |> render_click()
+    assert_patched(live, "/dashboard/oban?")
+  end
+
+  defp job_fixture(args \\ %{}, opts \\ []) do
+    opts = Keyword.put_new(opts, :worker, "FakeWorker")
+    {:ok, job} = Oban.Job.new(args, opts) |> Oban.insert()
     job
   end
 end

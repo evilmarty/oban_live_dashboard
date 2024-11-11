@@ -149,11 +149,6 @@ defmodule Oban.LiveDashboard do
 
   @impl true
   def handle_refresh(socket) do
-    {:noreply, assign_job_state_counts(socket)}
-  end
-
-  @impl true
-  def handle_refresh(socket) do
     {:noreply,
      socket
      |> assign_job_state_counts()

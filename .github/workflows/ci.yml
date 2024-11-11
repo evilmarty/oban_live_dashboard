@@ -12,40 +12,44 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Source: https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp
+        elixir-version: [1.14, 1.15, 1.16, 1.17]
+        otp-version: [24, 25, 26]
+        lint: [lint]
         include:
-          - pair:
-              elixir-version: 1.14
-              otp-version: 24.3
+          - elixir-version: 1.17
+            otp-version: 27
             lint: lint
-          - pair:
-              elixir-version: 1.15
-              otp-version: 26.0
-            lint: lint
+        exclude:
+          - elixir-version: 1.14
+            otp-version: 26
+          - elixir-version: 1.17
+            otp-version: 24
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Elixir
-      uses: erlef/setup-beam@v1
-      with:
-        elixir-version: ${{matrix.pair.elixir-version}}
-        otp-version: ${{matrix.pair.otp-version}}
-    - name: Restore elixir dependencies cache
-      uses: actions/cache@v4
-      with:
-        path: deps
-        key: ${{runner.os}}-mix-${{matrix.elixir-version}}-${{matrix.otp-version}}-${{hashFiles('**/mix.lock')}}
-        restore-keys: ${{runner.os}}-mix-${{matrix.elixir-version}}-${{matrix.otp-version}}-
-    - name: Install dependencies
-      run: mix deps.get --only test
-    - name: Check syntax formatting
-      run: mix format --check-formatted
-      if: ${{matrix.lint}}
-    - name: Check for unused dependencies
-      run: mix deps.unlock --check-unused
-      if: ${{matrix.lint}}
-    - name: Compile dependencies
-      run: mix deps.compile
-    - name: Compile
-      run: mix compile --warnings-as-errors
-      if: ${{matrix.lint}}
-    - name: Run tests
-      run: mix test
+      - uses: actions/checkout@v4
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{matrix.elixir-version}}
+          otp-version: ${{matrix.otp-version}}
+      - name: Restore elixir dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: deps
+          key: ${{runner.os}}-mix-${{matrix.elixir-version}}-${{matrix.otp-version}}-${{hashFiles('**/mix.lock')}}
+          restore-keys: ${{runner.os}}-mix-${{matrix.elixir-version}}-${{matrix.otp-version}}-
+      - name: Install dependencies
+        run: mix deps.get --only test
+      - name: Check syntax formatting
+        run: mix format --check-formatted
+        if: ${{matrix.lint}}
+      - name: Check for unused dependencies
+        run: mix deps.unlock --check-unused
+        if: ${{matrix.lint}}
+      - name: Compile dependencies
+        run: mix deps.compile
+      - name: Compile
+        run: mix compile --warnings-as-errors
+        if: ${{matrix.lint}}
+      - name: Run tests
+        run: mix test

@@ -74,14 +74,9 @@ defmodule Oban.LiveDashboardTest do
     refute live |> element("#modal-close") |> render_click() =~ "modal"
   end
 
-  defp job_fixture(args \\ %{}, state \\ "executing") do
-    {:ok, job} =
-      Oban.Job.new(args,
-        worker: "FakeWorker",
-        state: state,
-        attempted_at: DateTime.utc_now()
-      )
-      |> Oban.insert()
+  defp job_fixture(args \\ %{}, opts \\ []) do
+    opts  = Keyword.put(opts, :worker, "FakeWorker")
+    {:ok, job} = Oban.Job.new(args, opts) |> Oban.insert()
 
     job
   end

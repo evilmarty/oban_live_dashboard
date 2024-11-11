@@ -112,11 +112,7 @@ defmodule Oban.LiveDashboard do
 
   @impl true
   def handle_refresh(socket) do
-    socket =
-      socket
-      |> assign_job_state_counts()
-
-    {:noreply, socket}
+    {:noreply, assign_job_state_counts(socket)}
   end
 
   defp assign_job_state_counts(socket) do
@@ -141,7 +137,7 @@ defmodule Oban.LiveDashboard do
   end
 
   defp job_state_label(job_state, count) do
-    "#{job_state} - (#{count})"
+    "#{Phoenix.Naming.humanize(job_state)} (#{count})"
   end
 
   defp fetch_jobs(params, _node, job_state) do
@@ -163,7 +159,7 @@ defmodule Oban.LiveDashboard do
     end
   end
 
-  defp jobs_query(%{sort_by: sort_by, sort_dir: sort_dir, limit: limit}, "all" = _job_state) do
+  defp jobs_query(%{sort_by: sort_by, sort_dir: sort_dir, limit: limit}, "all") do
     Oban.Job
     |> limit(^limit)
     |> order_by({^sort_dir, ^sort_by})

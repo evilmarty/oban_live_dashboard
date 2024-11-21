@@ -27,6 +27,7 @@ defmodule Oban.LiveDashboard do
             <p class="font-weight-bold m-0"><%= job.worker %></p>
             <pre class="font-weight-lighter text-muted m-0"><%= truncate(inspect(job.args)) %></pre>
           </:col>
+          <:col :if={job_state == "all"} :let={job} field={:state} sortable={:desc}><%= job_state_label(job.state) %></:col>
           <:col :let={job} field={:attempt} header="Attempt" sortable={:desc}>
             <%= job.attempt %>/<%= job.max_attempts %>
           </:col>
@@ -179,7 +180,11 @@ defmodule Oban.LiveDashboard do
   end
 
   defp job_state_label(job_state, count) do
-    "#{Phoenix.Naming.humanize(job_state)} (#{count})"
+    "#{job_state_label(job_state)} (#{count})"
+  end
+
+  defp job_state_label(job_state) do
+    Phoenix.Naming.humanize(job_state)
   end
 
   defp fetch_jobs(params, _node, job_state) do

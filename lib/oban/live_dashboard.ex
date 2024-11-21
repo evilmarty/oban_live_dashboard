@@ -18,6 +18,8 @@ defmodule Oban.LiveDashboard do
 
   @impl true
   def render(assigns) do
+    assigns = assign(assigns, :now, DateTime.utc_now())
+
     ~H"""
     <h5 class="mb-3">Oban</h5>
     <.live_nav_bar id="oban_states" page={@page} nav_param="job_state" style={:bar} extra_params={["nav"]}>
@@ -33,7 +35,7 @@ defmodule Oban.LiveDashboard do
           </:col>
           <:col field={:queue} header="Queue" sortable={:desc} />
           <:col :let={job} field={@timestamp_field} sortable={:desc}>
-            <%= format_value(timestamp(job, @timestamp_field)) %>
+            <%= render_time(timestamp(job, @timestamp_field), @now) %>
           </:col>
         </.live_table>
       </:item>
@@ -61,15 +63,28 @@ defmodule Oban.LiveDashboard do
           <:elem label="Attempts"><%= @job.attempt %>/<%= @job.max_attempts %></:elem>
           <:elem label="Priority"><%= @job.priority %></:elem>
           <:elem label="Attempted at"><%= format_value(@job.attempted_at) %></:elem>
-          <:elem :if={@job.cancelled_at} label="Cancelled at"><%= format_value(@job.cancelled_at) %></:elem>
-          <:elem :if={@job.completed_at} label="Completed at"><%= format_value(@job.completed_at) %></:elem>
-          <:elem :if={@job.discarded_at} label="Discarded at"><%= format_value(@job.discarded_at) %></:elem>
-          <:elem label="Inserted at"><%= format_value(@job.inserted_at) %></:elem>
-          <:elem label="Scheduled at"><%= format_value(@job.scheduled_at) %></:elem>
+          <:elem :if={@job.cancelled_at} label="Cancelled at"><%= render_time(@job.cancelled_at, @now) %></:elem>
+          <:elem :if={@job.completed_at} label="Completed at"><%= render_time(@job.completed_at, @now) %></:elem>
+          <:elem :if={@job.discarded_at} label="Discarded at"><%= render_time(@job.discarded_at, @now) %></:elem>
+          <:elem label="Inserted at"><%= render_time(@job.inserted_at, @now) %></:elem>
+          <:elem label="Scheduled at"><%= render_time(@job.scheduled_at, @now) %></:elem>
         </.label_value_list>
       </div>
     </.live_modal>
     """
+  end
+
+  defp render_time(nil, _), do: nil
+
+  defp render_time(datetime, now) do
+    assigns = %{
+      datetime: datetime,
+      now: now,
+      iso8601: DateTime.to_iso8601(datetime),
+      title: DateTime.to_string(datetime)
+    }
+
+    ~H|<time datetime={@iso8601} title={@title}><%= format_relative(@datetime, @now) %></time>|
   end
 
   @impl true
@@ -257,6 +272,30 @@ defmodule Oban.LiveDashboard do
   end
 
   defp format_value(value), do: value
+
+  defp format_relative(%DateTime{} = a, %DateTime{} = b) do
+    delta = DateTime.diff(a, b, :second)
+    {prefix, suffix} = if delta < 0, do: {"", " ago"}, else: {"in ", ""}
+    {d, {h, m, s}} = :calendar.seconds_to_daystime(div(delta, 1000))
+
+    cond do
+      d > 1 -> "#{d} days"
+      d == 1 -> "1 day"
+      h > 1 -> "#{h} hours"
+      h == 1 -> "1 hour"
+      m > 1 -> "#{m} minutes"
+      m == 1 -> "1 minute"
+      s == 1 -> "1 second"
+      true -> "#{s} seconds"
+    end
+    |> then(fn x -> "#{prefix}#{x}#{suffix}" end)
+  end
+
+  defp format_relative(%DateTime{} = a, nil) do
+    format_relative(a, DateTime.utc_now())
+  end
+
+  defp format_relative(nil, _), do: nil
 
   defp timestamp(job, timestamp_field) do
     Map.get(job, timestamp_field)

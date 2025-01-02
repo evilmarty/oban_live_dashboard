@@ -276,7 +276,7 @@ defmodule Oban.LiveDashboard do
   defp format_relative(%DateTime{} = a, %DateTime{} = b) do
     delta = DateTime.diff(a, b, :second)
     {prefix, suffix} = if delta < 0, do: {"", " ago"}, else: {"in ", ""}
-    {d, {h, m, s}} = :calendar.seconds_to_daystime(div(delta, 1000))
+    {d, {h, m, s}} = :calendar.seconds_to_daystime(delta)
 
     cond do
       d > 1 -> "#{d} days"

@@ -6,7 +6,7 @@ defmodule Oban.LiveDashboard.MixProject do
   def project do
     [
       app: :oban_live_dashboard,
-      version: "0.2.0",
+      version: "0.2.1",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),

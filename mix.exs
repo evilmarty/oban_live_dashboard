@@ -26,7 +26,8 @@ defmodule Oban.LiveDashboard.MixProject do
       {:phoenix_live_dashboard, "~> 0.7"},
       {:floki, ">= 0.30.0", only: :test},
       {:ecto_sqlite3, ">= 0.0.0", only: :test},
-      {:oban, "~> 2.15"}
+      {:oban, "~> 2.15"},
+      {:jason, "~> 1.4.4"}
     ]
   end
 

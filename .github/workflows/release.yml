@@ -23,7 +23,7 @@ jobs:
               otp-version: 26.0
             lint: lint
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Set up Elixir
       uses: erlef/setup-beam@v1
       with:

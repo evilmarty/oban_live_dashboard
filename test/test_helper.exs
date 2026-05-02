@@ -81,13 +81,13 @@ Supervisor.start_link(
   [
     {Phoenix.PubSub, name: Oban.LiveDashboardTest.PubSub, adapter: Phoenix.PubSub.PG2},
     Oban.LiveDashboardTest.Repo,
-    Oban.LiveDashboardTest.Endpoint,
-    {Oban, testing: :manual, engine: Oban.Engines.Lite, repo: Oban.LiveDashboardTest.Repo},
     {Ecto.Migrator,
      repos: [Oban.LiveDashboardTest.Repo],
      migrator: fn repo, :up, opts ->
        Ecto.Migrator.run(repo, Path.join([__DIR__, "support", "migrations"]), :up, opts)
-     end}
+     end},
+    Oban.LiveDashboardTest.Endpoint,
+    {Oban, testing: :manual, engine: Oban.Engines.Lite, repo: Oban.LiveDashboardTest.Repo}
   ],
   strategy: :one_for_one
 )

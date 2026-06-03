@@ -4,6 +4,10 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    allow:
+      - dependency-type: "direct"
+        update-types:
+          - version-update:semver-patch
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
